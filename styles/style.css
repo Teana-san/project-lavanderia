@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+
+@theme {
+    --color-primary: #0066cc;
+    --color-primary-dark: #004d99;
+    --color-secondary: #00b4d8;
+    --color-dark: #1e293b;
+    --color-darker: #0f172b;
+    --color-light: #f8fafc;
+    --color-accent: #e2e8f0;
+    --color-text: #334155;
+
+    --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+html,
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    line-height: 1.6;
+    background-color: #ffffff;
+    scroll-behavior: smooth;
+}
+@media (max-width: 1024px) {
+    body {
+        padding-top: 64px;
+    }
+}
+
+/*MOBILE MENU*/
+
+#main-header {
+    transition: transform 0.3s ease-in-out;
+}
+
+.nav-up {
+    transform: translateY(-100%);
+}
+
+.nav-down {
+    transform: translateY(0);
+}
+
+@layer components {
+    .button-effect {
+        @apply sm:w-auto flex justify-center items-center gap-2 bg-secondary hover:bg-primary text-light font-bold rounded-lg shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer
+    }
+
+}
+
+
+
+
+
+/* COOKIE CONSENT */
+#cc-main {
+    --cc-bg: #ffffff;
+    --cc-font-family: var(--font-sans);
+    
+    /* Используем сгенерированные Tailwind переменные `--color-*` */
+    --cc-text: var(--color-text);
+
+    /* Кнопка "acceptAllBtn" */
+    --cc-btn-primary-bg: var(--color-primary);
+    --cc-btn-primary-text: #ffffff;
+    --cc-btn-primary-hover-bg: var(--color-primary-dark);
+
+    --cc-modal-border-radius: 12px;
+    --cc-btn-border-radius: 8px;
+}
+
+#cc-main .cm__title {
+    color: var(--color-primary);
+}
+
+#cc-main .cm__desc {
+    color: var(--color-text);
+}
+
+/* без этого появляется margin 6px на кнопке acceptNecessaryBtn */
+#cc-main .cm__btn {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+@media (max-width: 640px) {
+    #cc-main .cm__btn-group .cm__btn[data-role="necessary"] {
+        margin-top: 0 !important;
+    }
+}
+
+
+/* Кнопка "acceptNecessaryBtn" */
+#cc-main .cm__btn[data-role="necessary"] {
+    background: #e5e7eb !important;
+    color: var(--color-primary) !important;
+    border: none !important;
+}
+
+#cc-main .cm__btn[data-role="necessary"]:hover {
+    color: var(--color-primary-dark) !important;
+}
+
+
+/* Кнопка "showPreferencesBtn" */
+#cc-main .cm__btn[data-role="show"] {
+    background: #ffffff !important;
+    color: var(--color-primary);
+    border: 2px solid #e5e7eb !important;
+}
+
+#cc-main .cm__btn[data-role="show"]:hover {
+    color: var(--color-primary-dark) !important;
+}
+
+
+/* Порядок кнопок */
+#cc-main .cm__btn[data-role="necessary"] {
+    order: 1;
+}
+
+#cc-main .cm__btn[data-role="all"] {
+    order: 2;
+}
+
+#cc-main .cm__btn[data-role="show"] {
+    order: 3;
+}
+
+
+/* Layout */
+#cc-main .cm__btn-group {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px !important;
+    margin-bottom: 4px;
+}
+
+#cc-main .cm__btn[data-role="necessary"],
+#cc-main .cm__btn[data-role="all"] {
+    grid-column: auto;
+}
+
+#cc-main .cm__btn[data-role="show"] {
+    grid-column: 1 / -1;
+}
+
+
+/* Ссылки внизу */
+#cc-main .cm__footer-links {
+    margin-top: 15px;
+    border-top: 1px solid var(--color-accent);
+    padding-top: 10px;
+}
+
+#cc-main .cm__footer-links a {
+    color: #9ca3af !important;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    margin-right: 15px;
+}
+
+.grecaptcha-badge {
+    visibility: hidden;
+}
