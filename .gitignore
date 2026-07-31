@@ -1,5 +1,5 @@
 tailwindcss.exe
-
+.env
 .DS_Store
 Thumbs.db
 *.log

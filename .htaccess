@@ -1,3 +1,13 @@
+<Files ".env">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</Files>
+
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^([a-zA-Z0-9_-]+)$ $1.php [L]

@@ -1,7 +1,32 @@
 <?php
 
-// Clave secreta de reCAPTCHA
-$secretKey = "6LcJKm0tAAAAAEGyFPjhyWQ9KMeEA8AoD42pJqjE";
+// Функция для чтения файла .env
+function loadEnv(string $path): void
+{
+    if (!file_exists($path)) {
+        return;
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || strpos($line, '#') === 0) continue; // Игнорируем комментарии и пустые строки
+        if (strpos($line, '=') !== false) {
+            list($name, $value) = explode('=', $line, 2);
+            $_ENV[trim($name)] = trim($value);
+        }
+    }
+}
+
+loadEnv(__DIR__ . '/.env');
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require __DIR__ . '/PHPMailer/Exception.php';
+require __DIR__ . '/PHPMailer/PHPMailer.php';
+require __DIR__ . '/PHPMailer/SMTP.php';
+
+$secretKey = $_ENV['RECAPTCHA_SECRET_KEY'] ?? '';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Obtener y sanitizar los datos del formulario
@@ -16,12 +41,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $subject = "Nuevo mensaje desde la web";
     }
 
-    $name     = htmlspecialchars(trim($_POST['name'] ?? ''));
-    $email    = htmlspecialchars(trim($_POST['email'] ?? ''));
-    $phone    = htmlspecialchars(trim($_POST['phone'] ?? ''));
-    $empresa  = htmlspecialchars(trim($_POST['empresa'] ?? ''));
-    $message  = htmlspecialchars(trim($_POST['message'] ?? ''));
-    $politica = $_POST['politica'] ?? '';
+    $name           = trim($_POST['name'] ?? '');
+    $email          = trim($_POST['email'] ?? '');
+    $phone          = trim($_POST['phone'] ?? '');
+    $empresa        = trim($_POST['empresa'] ?? '');
+    $message        = trim($_POST['message'] ?? '');
+    $politica       = $_POST['politica'] ?? '';
     $recaptchaToken = $_POST['recaptcha_token'] ?? '';
 
     $errors = [];
@@ -93,36 +118,68 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Configuración del correo
-    $to = "teana318san@gmail.com";
+    $isLocalhost = ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_NAME'] === '127.0.0.1');
 
-    $body  = "Has recibido un nuevo mensaje desde el sitio web:\n";
-    $body .= "Origen: " . ($formType === 'presupuesto_rapido' ? 'Formulario Rápido' : 'Formulario Detallado') . "\n\n";
-    $body .= "Nombre: $name\n";
-    $body .= "Empresa / Sector: " . ($empresa ? $empresa : 'No especificado') . "\n";
-    $body .= "Email: $email\n";
-    $body .= "Teléfono: $phone\n";
-    
-    if (!empty($message)) {
-        $body .= "Mensaje: $message\n";
+    if ($isLocalhost) {
+        // На локалке имитируем успешную отправку
+        $mailSent = true;
+    } else {
+        $mail = new PHPMailer(true);
+
+        try {
+            // Настройки сервера Gmail
+            $mail->isSMTP();
+            $mail->Host       = $_ENV['SMTP_HOST'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $_ENV['SMTP_USER'];
+            $mail->Password   = $_ENV['SMTP_PASS'];
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = (int)$_ENV['SMTP_PORT'];
+            $mail->CharSet    = 'UTF-8';
+
+            // От кого и Кому
+            $mail->setFrom($_ENV['SMTP_USER'], 'Lavanderia Eduardo Web');
+            $mail->addAddress($_ENV['SMTP_USER']);
+
+            // Поле "Ответить"
+            $mail->addReplyTo($email, $name);
+
+            // Содержание письма
+            $mail->isHTML(false);
+            $mail->Subject = $subject . " - " . $name; // Используем динамическую тему из начала файла!
+
+            $mail->Body  = "Has recibido un nuevo mensaje desde la web:\n\n";
+            $mail->Body .= "Nombre: $name\n";
+            $mail->Body .= "Teléfono: $phone\n";
+            $mail->Body .= "Email: $email\n";
+
+            if (!empty($empresa)) {
+                $mail->Body .= "Sector/Empresa: $empresa\n";
+            }
+            if (!empty($message)) {
+                $mail->Body .= "Mensaje: $message\n";
+            }
+
+            $mail->send();
+            $mailSent = true;
+        } catch (Exception $e) {
+            error_log('PHPMailer error: ' . $mail->ErrorInfo);
+            $mailSent = false;
+        }
     }
 
-    // Headers
-    $headers  = "From: no-reply@lavanderia.com\r\n";
-    $headers .= "Reply-To: $email\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion();
-
-    if (mail($to, $subject, $body, $headers)) {
+    // 4. Отдаем JSON на фронтенд
+    if ($mailSent) {
         header('Content-Type: application/json');
         echo json_encode([
             'type'    => 'success',
-            'message' => '¡El mensaje se envió correctamente! Nos pondremos en contacto contigo pronto.'
+            'message' => '¡El mensaje se envió correctamente!'
         ]);
     } else {
         header('Content-Type: application/json');
         echo json_encode([
             'type'    => 'error',
-            'message' => 'Hubo un error al enviar el mensaje. Inténtalo de nuevo más tarde.'
+            'message' => 'Hubo un error al enviar el mensaje.'
         ]);
     }
     exit;
