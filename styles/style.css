@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+/* ./tailwindcss.exe -i ./styles/style.css -o ./styles/dist.css --watch */
 
 @theme {
     --color-primary: #0066cc;
