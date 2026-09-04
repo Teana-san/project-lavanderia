@@ -1,6 +1,6 @@
 <?php
 
-// Función para leer el archivo .env
+// Функция для чтения файла .env
 function loadEnv(string $path): void
 {
     if (!file_exists($path)) {
@@ -9,7 +9,7 @@ function loadEnv(string $path): void
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
         $line = trim($line);
-        if (empty($line) || strpos($line, '#') === 0) continue; // Ignoramos comentarios y líneas vacías
+        if (empty($line) || strpos($line, '#') === 0) continue; // Игнорируем комментарии и пустые строки
         if (strpos($line, '=') !== false) {
             list($name, $value) = explode('=', $line, 2);
             $_ENV[trim($name)] = trim($value);
@@ -32,8 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Obtener y sanitizar los datos del formulario
     $formType = $_POST['form_type'] ?? 'desconocido';
 
-    // Dinámico según el formulario enviado (el asunto del email siempre va en español,
-    // es solo para uso interno del equipo)
+    // Dinámico según el formulario enviado
     if ($formType === 'presupuesto_rapido') {
         $subject = "Solicitud Nueva: Presupuesto Rápido";
     } elseif ($formType === 'solicitud_detallada') {
@@ -50,44 +49,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $politica       = $_POST['politica'] ?? '';
     $recaptchaToken = $_POST['recaptcha_token'] ?? '';
 
-    // NOTA i18n: en lugar de mensajes de error ya traducidos, devolvemos un
-    // "código" corto (ej. "required_name"). El frontend (scripts/i18n.js +
-    // scripts/script.js) se encarga de traducirlo al idioma activo (ES/EN).
     $errors = [];
 
     // Validaciones
     if (empty($politica)) {
-        $errors['politica'] = "required_privacy";
+        $errors['politica'] = "Por favor, acepta la Política de Privacidad";
     }
 
     if (empty($name)) {
-        $errors['name'] = "required_name";
+        $errors['name'] = "El nombre es obligatorio";
     }
 
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = "invalid_email";
+        $errors['email'] = "El email debe ser válido";
     }
 
     // Validar teléfono (entre 9 y 15 dígitos)
     if (empty($phone)) {
-        $errors['phone'] = "required_phone";
+        $errors['phone'] = "El teléfono es obligatorio";
     } elseif (!preg_match('/^[0-9]{9,15}$/', preg_replace('/\s+/', '', $phone))) {
-        $errors['phone'] = "invalid_phone";
+        $errors['phone'] = "El teléfono debe ser válido (9 dígitos)";
     }
 
     // Validar sector/empresa en el primer formulario
     if ($formType === 'presupuesto_rapido' && empty($empresa)) {
-        $errors['empresa'] = "required_sector";
+        $errors['empresa'] = "Por favor, selecciona un sector";
     }
 
     // Validar mensaje obligatorio solo en el segundo formulario
     if ($formType === 'solicitud_detallada' && empty($message)) {
-        $errors['message'] = "required_message";
+        $errors['message'] = "El mensaje es obligatorio";
     }
 
     // Validar reCAPTCHA v3
     if (empty($recaptchaToken)) {
-        $errors['recaptcha'] = "recaptcha_missing";
+        $errors['recaptcha'] = "Fallo en la validación del reCAPTCHA.";
     } else {
         $url = 'https://www.google.com/recaptcha/api/siteverify';
         $data = [
@@ -107,11 +103,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $responseKeys = json_decode($response, true);
 
         if (!$responseKeys['success'] || ($responseKeys['score'] ?? 0) < 0.5) {
-            $errors['recaptcha'] = "recaptcha_failed";
+            $errors['recaptcha'] = "La validación de seguridad falló.";
         }
     }
 
-    // Si hay errores, enviarlos directamente como clave => código
+    // Si hay errores, enviarlos directamente como clave => valor
     if (!empty($errors)) {
         header('Content-Type: application/json');
         echo json_encode([
@@ -148,9 +144,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // Поле "Ответить"
             $mail->addReplyTo($email, $name);
 
-            // Содержание письма (email interno, siempre en español)
+            // Содержание письма
             $mail->isHTML(false);
-            $mail->Subject = $subject . " - " . $name;
+            $mail->Subject = $subject . " - " . $name; // Используем динамическую тему из начала файла!
 
             $mail->Body  = "Has recibido un nuevo mensaje desde la web:\n\n";
             $mail->Body .= "Nombre: $name\n";
@@ -172,19 +168,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Отдаем JSON на фронтенд (code = clave para traducir en el frontend)
+    // 4. Отдаем JSON на фронтенд
     if ($mailSent) {
         header('Content-Type: application/json');
         echo json_encode([
             'type'    => 'success',
-            'code'    => 'send_success',
             'message' => '¡El mensaje se envió correctamente!'
         ]);
     } else {
         header('Content-Type: application/json');
         echo json_encode([
             'type'    => 'error',
-            'errors'  => ['general' => 'send_error']
+            'message' => 'Hubo un error al enviar el mensaje.'
         ]);
     }
     exit;

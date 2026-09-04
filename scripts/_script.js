@@ -240,9 +240,6 @@ document.querySelectorAll(".nav-underline").forEach((el) => {
 document.addEventListener("DOMContentLoaded", function () {
     const RECAPTCHA_SITE_KEY = '6LcJKm0tAAAAAF_nzMAxx9kZkPgmae0K79ewjcf_';
 
-    // Traducción con fallback por si i18n.js no llegó a cargar
-    const tr = (key) => (window.i18n ? window.i18n.t(key) : key);
-
     const allForms = document.querySelectorAll('form');
 
     allForms.forEach(form => {
@@ -259,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        // Obtención del texto original del botón, tomando en cuenta el idioma actual
+        // Обработка отправки
         form.addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -275,17 +272,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Блокировка кнопки на время отправки
             submitBtn.disabled = true;
-            if (btnText) btnText.innerText = tr('messages.sending');
+            if (btnText) btnText.innerText = 'Enviando...';
             if (icon) icon.innerText = 'refresh';
 
             // Генерация токена reCAPTCHA
             grecaptcha.ready(function () {
                 grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'submit' }).then(function (token) {
-
+                    
                     const formData = new FormData(currentForm);
                     formData.append('recaptcha_token', token);
-                    // Le decimos al backend en qué idioma responder (por si se usa server-side)
-                    formData.append('lang', window.i18n ? window.i18n.currentLang() : 'es');
 
                     // Путь к универсальному скрипту
                     const fetchUrl = `${window.location.origin}/send_form.php`;
@@ -297,34 +292,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     .then(response => response.json())
                     .then(data => {
                         if (data.type === 'success') {
-                            // El backend devuelve un código (ej. "send_success"); si no,
-                            // usamos el texto tal cual (compatibilidad hacia atrás).
-                            const successMessage = data.code ? tr(`messages.${data.code}`) : (data.message || tr('messages.send_success'));
-
                             currentForm.innerHTML = `
                                 <div class="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
-                                    <h3 class="text-2xl font-bold text-primary mb-2">${tr('messages.successTitle')}</h3>
-                                    <p class="text-slate-300 max-w-xs">${successMessage}</p>
+                                    <h3 class="text-2xl font-bold text-primary mb-2">¡Enviado con éxito!</h3>
+                                    <p class="text-slate-300 max-w-xs">${data.message}</p>
                                     <button onclick="location.reload()" class="mt-6 text-secondary hover:underline text-sm">
-                                        ${tr('messages.sendAnother')}
+                                        Enviar otro mensaje
                                     </button>
                                 </div>
                             `;
                         } else if (data.type === 'error' && data.errors) {
-                            Object.entries(data.errors).forEach(([field, codeOrMessage]) => {
-                                if (!codeOrMessage) return;
-
-                                // El backend puede enviar un código de error (ej. "required_name")
-                                // que traducimos aquí, o un texto ya formado (compatibilidad).
-                                const translated = window.i18n && window.i18n.t(`errors.${codeOrMessage}`) !== `errors.${codeOrMessage}`
-                                    ? tr(`errors.${codeOrMessage}`)
-                                    : codeOrMessage;
+                            Object.entries(data.errors).forEach(([field, message]) => {
+                                if (!message) return;
 
                                 const errorDisplay = currentForm.querySelector(`#error-${field}`);
                                 const inputElement = currentForm.querySelector(`[name="${field}"]`);
 
                                 if (errorDisplay) {
-                                    errorDisplay.textContent = translated;
+                                    errorDisplay.textContent = message;
                                     errorDisplay.classList.remove('hidden');
                                 }
                                 if (inputElement) {
@@ -335,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert(tr('messages.connectionError'));
+                        alert('Error de conexión con el servidor.');
                     })
                     .finally(() => {
                         submitBtn.disabled = false;
