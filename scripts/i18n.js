@@ -18,12 +18,12 @@
     const dict = {
         es: {
             meta: {
-                title: "Lavandería Industrial en Alicante | Servicio para Hoteles y Restaurantes",
-                description: "Lavandería industrial en Alicante para hostelería, restaurantes y hoteles. +20 años de experiencia. Recogida y entrega gratis en 24/48h. ¡Solicita presupuesto!"
+                title: "Lavandería Industrial para Restaurantes | Vega Baja (Alicante)",
+                description: "Lavandería industrial en Formentera del Segura y Vega Baja (Alicante). Mantelería para restaurantes y textil para hostelería. +20 años, recogida y entrega gratis en 24/48h."
             },
             brand: {
-                nameHeader: 'Lavandería <span class="text-primary">B2B</span>',
-                nameFooter: 'Lavandería <span class="text-secondary">B2B</span>'
+                nameHeader: 'Maiti<span class="text-primary">2</span>Wash',
+                nameFooter: 'Maiti<span class="text-secondary">2</span>Wash'
             },
             nav: {
                 inicio: "Inicio",
@@ -161,12 +161,12 @@
 
         en: {
             meta: {
-                title: "Industrial Laundry Service in Alicante | For Hotels & Restaurants",
-                description: "Industrial laundry service in Alicante for hospitality, restaurants and hotels. +20 years of experience. Free pickup and delivery in 24/48h. Get a free quote!"
+                title: "Industrial Laundry for Restaurants | Vega Baja (Alicante)",
+                description: "Industrial laundry service in Formentera del Segura and Vega Baja (Alicante). Linens for restaurants and hospitality textiles. +20 years, free pickup and delivery in 24/48h."
             },
             brand: {
-                nameHeader: 'Laundry <span class="text-primary">B2B</span>',
-                nameFooter: 'Laundry <span class="text-secondary">B2B</span>'
+                nameHeader: 'Maiti<span class="text-primary">2</span>Wash',
+                nameFooter: 'Maiti<span class="text-secondary">2</span>Wash'
             },
             nav: {
                 inicio: "Home",

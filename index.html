@@ -8,9 +8,9 @@
     <!-- <script src="scripts/gtag-ads.js"></script> -->
 
     <!-- SEO & Title -->
-    <title data-i18n="meta.title">Lavandería Industrial en Alicante | Servicio para Hoteles y Restaurantes</title>
+    <title data-i18n="meta.title">Lavandería Industrial para Restaurantes | Vega Baja (Alicante)</title>
     <meta name="description" data-i18n-content="meta.description"
-        content="Lavandería industrial en Alicante para hostelería, restaurantes y hoteles. +20 años de experiencia. Recogida y entrega gratis en 24/48h. ¡Solicita presupuesto!">
+        content="Lavandería industrial en Formentera del Segura y Vega Baja (Alicante). Mantelería para restaurantes y textil para hostelería. +20 años, recogida y entrega gratis en 24/48h.">
 
     <!-- favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -40,55 +40,60 @@
     <script src="scripts/i18n.js" defer></script>
     <script src="scripts/script.js" defer></script>
 
-    <!-- Google reCAPTCHA v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=6LcJKm0tAAAAAF_nzMAxx9kZkPgmae0K79ewjcf_"></script>
 
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Lavandería Industrial en Alicante | Servicio para Hoteles y Restaurantes">
+    <meta property="og:title" content="Lavandería Industrial para Restaurantes | Vega Baja (Alicante)">
     <meta property="og:description"
-        content="Lavandería industrial en Alicante para hostelería, restaurantes y hoteles. Recogida y entrega gratis en 24/48h.">
+        content="Lavandería industrial en Formentera del Segura y Vega Baja (Alicante). Mantelería para restaurantes y textil para hostelería. Recogida y entrega gratis en 24/48h.">
     <meta property="og:image" content="https://dominio.com/img/og-image.jpg">
     <meta property="og:url" content="https://dominio.com/">
     <meta property="og:locale" content="es_ES">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Lavandería Industrial | Servicio Profesional">
-    <meta name="twitter:description" content="Servicio de lavandería industrial para hostelería en [ciudad].">
-    <meta name="twitter:image" content="https://tudominio.com/img/og-image.jpg">
+    <meta name="twitter:title" content="Lavandería Industrial para Restaurantes | Maiti 2 Wash">
+    <meta name="twitter:description" content="Mantelería y textil de hostelería en Formentera del Segura y Vega Baja (Alicante).">
+    <meta name="twitter:image" content="https://dominio.com/img/og-image.jpg">
 
     <!-- SEO schema -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "DryCleaningOrLaundry",
-  "name": "Nombre real de la empresa",
+  "name": "Maiti 2 Wash",
   "image": "https://dominio.com/img/logo.jpg",
   "url": "https://dominio.com",
-  "telephone": "+34 XXX XXX XXX",
+  "telephone": "+34 966 79 23 15",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "Calle ...",
-    "addressLocality": "Ciudad",
-    "postalCode": "XXXXX",
+    "streetAddress": "Av. Reina Sofía, 8",
+    "addressLocality": "Formentera del Segura",
+    "postalCode": "03179",
+    "addressRegion": "Alicante",
     "addressCountry": "ES"
   },
-  "openingHours": "Mo-Fr 09:00-18:00",
+  "openingHours": "Mo-Fr 09:00-14:00",
   "priceRange": "€€",
-  "areaServed": "Alicante",
+  "areaServed": [
+    "Formentera del Segura",
+    "Rojales",
+    "Guardamar del Segura",
+    "Almoradí",
+    "Benijófar",
+    "Torrevieja"
+  ],
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": 38.3452,
-    "longitude": -0.4810
-  },
-  "sameAs": [
-    "https://www.facebook.com/empresa",
-    "https://www.instagram.com/empresa"
-  ]
+    "latitude": 38.0871497,
+    "longitude": -0.7407902
+  }
 }
 </script>
+<!-- TODO: cuando tengáis dominio propio, sustituir "dominio.com" por el real
+     en "image", "url" (arriba), canonical, og:*, twitter:* y añadir de nuevo
+     "sameAs" con los enlaces reales a Facebook/Instagram cuando los tengáis. -->
 
 </head>
 
@@ -244,8 +249,12 @@
                 </p>
 
                 <form class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end" novalidate>
-                    <input type="hidden" name="recaptcha_token">
+                    <!-- Reemplaza YOUR_ACCESS_KEY_HERE por la clave que te envíe web3forms.com -->
+                    <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+                    <input type="hidden" name="subject" value="Nueva solicitud: Presupuesto Rápido — Web Maiti 2 Wash">
                     <input type="hidden" name="form_type" value="presupuesto_rapido">
+                    <!-- Campo trampa para bots (Web3Forms lo ignora si va vacío, spam si se rellena) -->
+                    <input type="checkbox" name="botcheck" class="hidden" style="display:none">
 
                     <div class="field-group md:col-span-1">
                         <div id="error-name" class="error-msg text-red-400 text-xs mb-1 hidden"></div>
@@ -660,8 +669,12 @@
                 <!-- Formulario -->
                 <div id="contacto-main" class="bg-dark border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-xl">
                     <form id="leadForm" class="space-y-6">
-                        <input type="hidden" name="recaptcha_token">
+                        <!-- Reemplaza YOUR_ACCESS_KEY_HERE por la clave que te envíe web3forms.com -->
+                        <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+                        <input type="hidden" name="subject" value="Nueva solicitud: Consulta Detallada — Web Maiti 2 Wash">
                         <input type="hidden" name="form_type" value="solicitud_detallada">
+                        <!-- Campo trampa para bots (Web3Forms lo ignora si va vacío, spam si se rellena) -->
+                        <input type="checkbox" name="botcheck" class="hidden" style="display:none">
 
                         <!-- Nombre y Empresa -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">

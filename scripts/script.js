@@ -236,12 +236,46 @@ document.querySelectorAll(".nav-underline").forEach((el) => {
   })();
 
 
-/* FORM TO EMAIL */
+/* FORM TO EMAIL — vía Web3Forms (gratis, sin backend propio) */
 document.addEventListener("DOMContentLoaded", function () {
-    const RECAPTCHA_SITE_KEY = '6LcJKm0tAAAAAF_nzMAxx9kZkPgmae0K79ewjcf_';
+    const WEB3FORMS_ENDPOINT = 'https://api.web3forms.com/submit';
 
     // Traducción con fallback por si i18n.js no llegó a cargar
     const tr = (key) => (window.i18n ? window.i18n.t(key) : key);
+
+    // Validación mínima en el propio navegador (Web3Forms no valida campo a
+    // campo como hacía nuestro antiguo send_form.php, así que replicamos aquí
+    // las reglas imprescindibles antes de enviar).
+    function validateForm(form) {
+        const errors = {};
+        const get = (name) => form.querySelector(`[name="${name}"]`);
+
+        const name = get('name');
+        if (name && !name.value.trim()) errors.name = tr('errors.required_name');
+
+        const email = get('email');
+        if (email && (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()))) {
+            errors.email = tr('errors.invalid_email');
+        }
+
+        const phone = get('phone');
+        if (phone) {
+            const digits = phone.value.replace(/\s+/g, '');
+            if (!digits) errors.phone = tr('errors.required_phone');
+            else if (!/^[0-9]{9,15}$/.test(digits)) errors.phone = tr('errors.invalid_phone');
+        }
+
+        const empresaSelect = form.querySelector('select[name="empresa"]');
+        if (empresaSelect && !empresaSelect.value) errors.empresa = tr('errors.required_sector');
+
+        const message = get('message');
+        if (message && form.id === 'leadForm' && !message.value.trim()) errors.message = tr('errors.required_message');
+
+        const politica = get('politica');
+        if (politica && !politica.checked) errors.politica = tr('errors.required_privacy');
+
+        return errors;
+    }
 
     const allForms = document.querySelectorAll('form');
 
@@ -259,7 +293,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        // Obtención del texto original del botón, tomando en cuenta el idioma actual
         form.addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -273,76 +306,60 @@ document.addEventListener("DOMContentLoaded", function () {
             currentForm.querySelectorAll('.error-msg').forEach(msg => msg.classList.add('hidden'));
             currentForm.querySelectorAll('input, select, textarea').forEach(el => el.classList.remove('border-red-500'));
 
+            // Validación local (ya no hay servidor propio que la haga)
+            const errors = validateForm(currentForm);
+            if (Object.keys(errors).length > 0) {
+                Object.entries(errors).forEach(([field, message]) => {
+                    const errorDisplay = currentForm.querySelector(`#error-${field}`);
+                    const inputElement = currentForm.querySelector(`[name="${field}"]`);
+                    if (errorDisplay) {
+                        errorDisplay.textContent = message;
+                        errorDisplay.classList.remove('hidden');
+                    }
+                    if (inputElement) inputElement.classList.add('border-red-500');
+                });
+                return;
+            }
+
             // Блокировка кнопки на время отправки
             submitBtn.disabled = true;
             if (btnText) btnText.innerText = tr('messages.sending');
             if (icon) icon.innerText = 'refresh';
 
-            // Генерация токена reCAPTCHA
-            grecaptcha.ready(function () {
-                grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'submit' }).then(function (token) {
+            const formData = new FormData(currentForm);
+            formData.append('lang', window.i18n ? window.i18n.currentLang() : 'es');
+            const payload = Object.fromEntries(formData.entries());
 
-                    const formData = new FormData(currentForm);
-                    formData.append('recaptcha_token', token);
-                    // Le decimos al backend en qué idioma responder (por si se usa server-side)
-                    formData.append('lang', window.i18n ? window.i18n.currentLang() : 'es');
-
-                    // Путь к универсальному скрипту
-                    const fetchUrl = `${window.location.origin}/send_form.php`;
-
-                    fetch(fetchUrl, {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.type === 'success') {
-                            // El backend devuelve un código (ej. "send_success"); si no,
-                            // usamos el texto tal cual (compatibilidad hacia atrás).
-                            const successMessage = data.code ? tr(`messages.${data.code}`) : (data.message || tr('messages.send_success'));
-
-                            currentForm.innerHTML = `
-                                <div class="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
-                                    <h3 class="text-2xl font-bold text-primary mb-2">${tr('messages.successTitle')}</h3>
-                                    <p class="text-slate-300 max-w-xs">${successMessage}</p>
-                                    <button onclick="location.reload()" class="mt-6 text-secondary hover:underline text-sm">
-                                        ${tr('messages.sendAnother')}
-                                    </button>
-                                </div>
-                            `;
-                        } else if (data.type === 'error' && data.errors) {
-                            Object.entries(data.errors).forEach(([field, codeOrMessage]) => {
-                                if (!codeOrMessage) return;
-
-                                // El backend puede enviar un código de error (ej. "required_name")
-                                // que traducimos aquí, o un texto ya formado (compatibilidad).
-                                const translated = window.i18n && window.i18n.t(`errors.${codeOrMessage}`) !== `errors.${codeOrMessage}`
-                                    ? tr(`errors.${codeOrMessage}`)
-                                    : codeOrMessage;
-
-                                const errorDisplay = currentForm.querySelector(`#error-${field}`);
-                                const inputElement = currentForm.querySelector(`[name="${field}"]`);
-
-                                if (errorDisplay) {
-                                    errorDisplay.textContent = translated;
-                                    errorDisplay.classList.remove('hidden');
-                                }
-                                if (inputElement) {
-                                    inputElement.classList.add('border-red-500');
-                                }
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert(tr('messages.connectionError'));
-                    })
-                    .finally(() => {
-                        submitBtn.disabled = false;
-                        if (btnText) btnText.innerText = originalText;
-                        if (icon) icon.innerText = 'send';
-                    });
-                });
+            fetch(WEB3FORMS_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentForm.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
+                            <h3 class="text-2xl font-bold text-primary mb-2">${tr('messages.successTitle')}</h3>
+                            <p class="text-slate-300 max-w-xs">${tr('messages.send_success')}</p>
+                            <button onclick="location.reload()" class="mt-6 text-secondary hover:underline text-sm">
+                                ${tr('messages.sendAnother')}
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    console.error('Web3Forms error:', data.message);
+                    alert(tr('messages.send_error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(tr('messages.connectionError'));
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                if (btnText) btnText.innerText = originalText;
+                if (icon) icon.innerText = 'send';
             });
         });
     });
