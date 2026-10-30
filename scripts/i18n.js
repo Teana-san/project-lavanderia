@@ -22,8 +22,8 @@
                 description: "Lavandería industrial en Formentera del Segura y Vega Baja (Alicante). Mantelería para restaurantes y textil para hostelería. +20 años, recogida y entrega gratis en 24/48h."
             },
             brand: {
-                nameHeader: 'Maiti<span class="text-orange">2</span>Wash',
-                nameFooter: 'Maiti<span class="text-orange">2</span>Wash'
+                nameHeader: '<img src="assets/icons/maiti-logo.svg" alt="Maiti2Wash" class="h-10 inline-block">',
+                nameFooter: '<img src="assets/icons/maiti-logo.svg" alt="Maiti2Wash" class="h-10 inline-block">'
             },
             nav: {
                 inicio: "Inicio",
