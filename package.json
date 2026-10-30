@@ -1,0 +1,26 @@
+{
+  "name": "project-lavanderia",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "npx @tailwindcss/cli -i ./styles/style.css -o ./styles/dist.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Teana-san/project-lavanderia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Teana-san/project-lavanderia/issues"
+  },
+  "homepage": "https://github.com/Teana-san/project-lavanderia#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
